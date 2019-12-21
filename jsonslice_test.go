@@ -182,41 +182,41 @@ func Test_Expressions(t *testing.T) {
 	}{
 		// self
 		{`$`, data},
+		// simple query
+		{`$.expensive`, []byte(`10`)},
+		// simple query
+		{`$.store.book[3].author`, []byte(`"J. R. R. Tolkien"`)},
+
+		// boolean, null
+		{`$.store.open`, []byte(`true`)},
+		{`$.store.branch`, []byte(`null`)},
+
+		// negative index
+		{`$.store.book[-1].author`, []byte(`"J. R. R. Tolkien"`)},
+		// negative indexes
+		{`$.store.book[-3:-2].author`, []byte(`["Evelyn Waugh"]`)},
+
+		// functions
+		{`$.store.book.length()`, []byte(`4`)},
+		{`$.store.book.count()`, []byte(`4`)},
+		{`$.store.book.size()`, []byte(`604`)},
+
+		// aggregated
+		{`$.store.book[1:3].author`, []byte(`["Evelyn Waugh","Herman Melville"]`)},
+		// aggregated, skip missing keys
+		{`$.store.book[1:].isbn`, []byte(`["0-553-21311-3","0-395-19395-8"]`)},
+		// aggregated, enumerate indexes
+		{`$.store.book[0,2].title`, []byte(`["Sayings of the Century","Moby Dick"]`)},
+
+		// filters: simple expression
+		{`$.store.book[?(@.price>10)].title`, []byte(`["Sword of Honour","The Lord of the Rings"]`)},
+		// filters: simple expression + spaces
+		{`$.store.book[?( @.price < 10 )].title`, []byte(`["Sayings of the Century","Moby Dick"]`)},
+		// filters: simple expression
+		{`$.store.book[?(@.price==12.99)].title`, []byte(`["Sword of Honour"]`)},
+		// more spaces
+		{`$.store.book[?(   @.price   >   10  )].title`, []byte(`["Sword of Honour","The Lord of the Rings"]`)},
 		/*
-			// simple query
-			{`$.expensive`, []byte(`10`)},
-			// simple query
-			{`$.store.book[3].author`, []byte(`"J. R. R. Tolkien"`)},
-
-			// boolean, null
-			{`$.store.open`, []byte(`true`)},
-			{`$.store.branch`, []byte(`null`)},
-
-			// negative index
-			{`$.store.book[-1].author`, []byte(`"J. R. R. Tolkien"`)},
-			// negative indexes
-			{`$.store.book[-3:-2].author`, []byte(`["Evelyn Waugh"]`)},
-
-			// functions
-			{`$.store.book.length()`, []byte(`4`)},
-			{`$.store.book.count()`, []byte(`4`)},
-			{`$.store.book.size()`, []byte(`604`)},
-
-			// aggregated
-			{`$.store.book[1:3].author`, []byte(`["Evelyn Waugh","Herman Melville"]`)},
-			// aggregated, skip missing keys
-			{`$.store.book[1:].isbn`, []byte(`["0-553-21311-3","0-395-19395-8"]`)},
-			// aggregated, enumerate indexes
-			{`$.store.book[0,2].title`, []byte(`["Sayings of the Century","Moby Dick"]`)},
-
-			// filters: simple expression
-			{`$.store.book[?(@.price>10)].title`, []byte(`["Sword of Honour","The Lord of the Rings"]`)},
-			// filters: simple expression + spaces
-			{`$.store.book[?( @.price < 10 )].title`, []byte(`["Sayings of the Century","Moby Dick"]`)},
-			// filters: simple expression
-			{`$.store.book[?(@.price==12.99)].title`, []byte(`["Sword of Honour"]`)},
-			// more spaces
-			{`$.store.book[?(   @.price   >   10  )].title`, []byte(`["Sword of Honour","The Lord of the Rings"]`)},
 
 			// field presence
 			{`$.store.book[?(@.isbn)].title`, []byte(`["Moby Dick","The Lord of the Rings"]`)},
